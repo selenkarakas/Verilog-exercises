@@ -1,0 +1,154 @@
+module Vend_FSM (sel1, sel2, sel3, sel4, p_10, p_20, cancel, clock, reset, coins,product,pstate,nstate);
+input sel1, sel2, sel3, sel4, p_10, p_20, cancel, clock, reset;
+output reg [5:0] coins;
+output reg [1:0] product;
+output reg [4:0] pstate;
+output reg [4:0] nstate;
+parameter [4:0] s0=5'b00001;
+parameter [4:0] s1=5'b00010;
+parameter [4:0] s2=5'b00100;
+parameter [4:0] s3=5'b01000;
+parameter [4:0] s4=5'b10000;
+always@(posedge clock or posedge reset)
+begin
+if(reset)
+pstate<= s0;
+else
+pstate<=nstate;
+end
+always@(pstate or p_10 or p_20 or cancel)
+begin
+case(pstate)
+s0: begin
+if(p_10)
+begin
+coins=6'b001010;
+product<=0;
+nstate<=s1;
+end
+else if(p_20)
+begin
+coins=6'b010100;
+product<=0;
+nstate<=s2;
+end
+else
+begin
+coins<=0;
+product<=0;
+nstate<=s0;
+end
+end
+s1: begin
+if(p_10)
+begin
+coins=6'b010100;
+product<=0;
+nstate<=s2;
+end
+else if(p_20)
+begin
+coins=6'b011110;
+product<=0;
+nstate<=s3;
+end
+else if(cancel)
+begin
+coins<=6'b000000;
+product<=0;
+nstate<=s0;
+end
+else
+begin
+coins=6'b001010;
+product<=0;
+nstate<=s1;
+end
+end
+s2:begin
+if(p_10)
+begin
+coins=6'b011110;
+product<=0;
+nstate<=s3;
+end
+else if(p_20)
+begin
+coins=6'b101000;
+product<=0;
+nstate<=s4;
+end
+else if(cancel)
+begin
+coins<=0;
+product<=0;
+nstate<=s0;
+end
+else begin
+coins=6'b010100;
+product<=0;
+nstate<=s2;
+end
+end
+s3:begin
+if(sel1)
+begin
+coins<=0;
+product=2'b00;
+nstate=s0;
+end
+else if(sel4)
+begin
+coins<=0;
+product=2'b00;
+nstate=s0;
+end
+else if(p_10)
+begin
+coins=6'b101000;
+product<=0;
+nstate<=s4;
+end
+else begin
+coins=6'b011110;
+product<=0;
+nstate<=s3;
+end
+end
+s4:begin
+if(sel1 )
+begin
+coins=6'b001010;
+product=2'b00;
+nstate<=s1;
+end
+else if(sel2)
+begin
+coins<=0;
+product=2'b01;
+nstate<=s0;
+end
+else if(sel3)
+begin
+coins<=0;
+product=2'b01;
+nstate<=s0;
+end
+else if(sel4)
+begin
+coins=6'b001010;
+product=2'b00;
+nstate<=s1;
+end
+else begin
+coins=6'b101000;
+product<=0;
+nstate<=s4;
+end
+end
+default:begin
+nstate<=pstate;
+end
+endcase
+end
+endmodule
