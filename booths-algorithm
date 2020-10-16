@@ -1,0 +1,110 @@
+module booths (start,Q0,Qminus,count,clock,present,next,add,sub,shift,load,counter,reset);
+
+parameter n = 4;
+input Q0,Qminus,start,reset,clock;
+output reg add,sub,shift,load;
+input [3:0] count;
+output reg [3:0] counter=4'b0100;
+output reg [6:0] present, next;
+parameter [6:0] s0=7'b0000001;//initial
+parameter [6:0] s1=7'b0000010;//shifter
+parameter [6:0] s2=7'b0000100;//adder
+parameter [6:0] s3=7'b0001000;//subtractor
+parameter [6:0] s4=7'b0010000;//counter
+parameter [6:0] s5=7'b0100000;//loader
+parameter [6:0] s6=7'b1000000;//finisher
+
+always@(posedge clock)
+	if(counter==4'b0100 && start==1 ||  reset==1)
+		present<=s0;
+	else
+		present<=next;
+always@(Q0 or Qminus or shift or load or sub)
+begin
+case(present)
+	s0:begin
+		counter <= 4'b0100;
+		add=0;
+		sub=0;
+		shift=0;
+		load=0;
+		if (count==0)
+			next<=s6;//finish
+		else if(Q0==Qminus)
+			next<=s1;//shifter
+		else if(Q0==0 && Qminus==1)
+			next<=s2;//add
+		else
+			next<=s3;//subtract
+		end
+		
+	s1:begin
+		add=0;
+		sub=0;
+		shift=1;
+		load=0;
+		if(reset==1)
+			next<=s0;
+		else
+			next<=s4;
+		end
+	s2:begin
+		add=1;
+		sub=0;
+		shift=0;
+		load=0;
+		if(reset==1)
+			next<=s0;
+		else
+			next<=s5;
+		end
+		
+	s3:begin
+		add=0;
+		sub=1;
+		shift=0;
+		load=0;
+		if(reset==1)
+			next<=s0;
+		else
+			next<=s5;
+		end
+		
+	s4:begin
+		counter<=count;
+		add=0;
+		sub=0;
+		shift=0;
+		load=0;
+		if(reset==1)
+			next<=s0;
+		else if (count==0)
+			next<=s6;//finih
+		else if(Q0==Qminus)
+			next<=s1;//shifter
+		else if(Q0==0 && Qminus==1)
+			next<=s2;//add
+		else
+			next<=s3;//subtract
+		end
+		
+	s5:begin
+		add=0;
+		sub=0;
+		shift=0;
+		load=1;
+		if(reset==1)
+			next<=s0;
+		else
+			next<=s1;
+		end
+		
+	s6:begin
+		if(reset==1)
+			next<=s0;
+		else
+			next<=s6;
+		end
+endcase
+end
+endmodule
