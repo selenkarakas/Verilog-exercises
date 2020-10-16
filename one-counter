@@ -1,0 +1,31 @@
+module countones_selen (data,reset,enable,clock,load,Q,count);
+input [7:0]data;
+input enable,reset,clock,load;
+output [7:0]Q;
+output [3:0]count;
+reg [7:0]Q;
+reg [3:0]count;
+always @(posedge clock or negedge reset)
+begin
+ if(!reset)
+ begin
+ Q=8'b00000000;
+ count=4'b0000;
+ end
+ else if(!enable)
+ begin
+ Q=8'b00000000;
+ count=4'b0000;
+ end
+ else if(enable==1 && load==1)
+ begin
+ Q<=data;
+ count=4'b0000;
+ end
+ else
+ begin
+ Q<=data;
+ count=data[0]+data[1]+data[2]+data[3]+data[4]+data[5]+data[6]+data[7];
+end
+end
+endmodule
