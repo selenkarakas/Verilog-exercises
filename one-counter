@@ -29,3 +29,28 @@ begin
 end
 end
 endmodule
+
+
+----------------------PROPER-TESTBENCH---------------
+module testbench_selen();
+reg reset,enable,clock,load;
+reg [7:0]data;
+wire [3:0]count;
+wire [7:0]Q;
+countones_selen DUT(data,reset,enable,clock,load,Q,count);
+always
+begin
+ clock=1; #200; clock=0; #200;
+end
+always begin
+ reset = 0; load = 0; enable = 0; data=8'b01010101; #200;
+ reset = 1; load = 1; enable = 1; data=8'b01010101; #200;
+ reset = 1; load = 0; enable = 1; data=8'b01010101; #1000;
+ reset = 0; load = 0; enable = 0; data=8'b11010111; #200;
+ reset = 1; load = 1; enable = 1; data=8'b11010111; #200;
+ reset = 1; load = 0; enable = 1; data=8'b11010111; #1000;
+ reset = 0; load = 0; enable = 0; data=8'b11000001; #200;
+ reset = 1; load = 1; enable = 1; data=8'b11000001; #200;
+ reset = 1; load = 0; enable = 1; data=8'b11000001; #1000;
+end
+endmodule
